@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FGPX Web Design System Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #0f0f0f;
+  --surface2: #1a1a1a;
+  --bdr: #262626;
+  --bdr2: #1f1f1f;
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,0.1);
+  --amber-border: rgba(245,158,11,0.25);
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --violet: #8b5cf6;
+  --cyan: #06b6d4;
+  --text: #ffffff;
+  --muted: #888888;
+  --font: 'Inter', sans-serif;
+  --mono: 'Inter', sans-serif;
+  --radius: 12px;
+}
+
+body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; min-height: 100vh; overflow: hidden; font-size: 14px; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 2px; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 220px; min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--bdr);
+  display: flex; flex-direction: column;
+  height: 100vh; overflow-y: auto;
+  position: sticky; top: 0;
+}
+
+.logo-wrap { padding: 26px 22px 18px; border-bottom: 1px solid var(--bdr); }
+.logo { font-size: 21px; font-weight: 500; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #ffffff; flex-shrink: 0; margin-top: 1px; }
+.logo-sub { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+nav { padding: 10px; flex: 1; }
+.nav-group-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px 10px 5px; margin-top: 6px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px; cursor: pointer;
+  color: var(--muted); font-size: 13px; font-weight: 400;
+  transition: all 0.12s ease; margin-bottom: 1px;
+  border: 1px solid transparent;
+  user-select: none;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(255,255,255,0.07); color: #ffffff; border-color: rgba(255,255,255,0.12); font-weight: 500; }
+.nav-badge { margin-left: auto; background: #ffffff; color: #000000; font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 6px; border-radius: 10px; }
+
+.sidebar-footer { padding: 14px 16px; border-top: 1px solid var(--bdr); }
+.status-dot-wrap { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 2s infinite; flex-shrink: 0; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── MAIN ── */
+#main { flex: 1; overflow-y: auto; background: var(--bg); }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── PAGE HEADER ── */
+.page-header { padding: 34px 36px 22px; border-bottom: 1px solid var(--bdr); display: flex; align-items: flex-end; justify-content: space-between; }
+.page-title { font-size: 38px; font-weight: 500; letter-spacing: -1.5px; line-height: 1; }
+.page-desc { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.page-header-right { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: right; line-height: 1.6; }
+
+/* ── HERO ── */
+.hero { padding: 44px 36px 0; background: radial-gradient(ellipse 60% 60% at 90% 10%, rgba(245,158,11,0.07) 0%, transparent 70%), var(--bg); border-bottom: 1px solid var(--bdr); position: relative; overflow: hidden; }
+.hero-title { font-size: 50px; font-weight: 500; letter-spacing: -2px; line-height: 1.05; }
+.hero-title .accent { color: #ffffff; }
+.hero-desc { font-size: 13px; color: var(--muted); margin-top: 10px; max-width: 480px; line-height: 1.7; }
+.hero-stats { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid var(--bdr); margin-top: 32px; }
+.hero-stat { padding: 18px 22px; border-right: 1px solid var(--bdr); }
+.hero-stat:last-child { border-right: none; }
+.hero-stat-n { font-size: 30px; font-weight: 500; letter-spacing: -1px; }
+.hero-stat-l { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+/* ── CONTENT ── */
+.content { padding: 24px 36px 40px; }
+
+/* ── SECTION LABEL ── */
+.section-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 26px 0 12px; }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.grid-32 { display: grid; grid-template-columns: 3fr 2fr; gap: 14px; }
+.col2 { grid-column: span 2; }
+
+/* ── CARD ── */
+.card { background: var(--surface); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 20px; position: relative; overflow: hidden; }
+.card-accent-bar { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.card-title { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+.card-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 16px; }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+
+/* ── STAT CARD ── */
+.stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; margin-top: 4px; }
+.stat-value { font-size: 38px; font-weight: 500; letter-spacing: -1.5px; line-height: 1; }
+.stat-delta { font-family: var(--mono); font-size: 10px; margin-top: 6px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.delta-up { color: #ffffff; }
+.delta-down { color: #888888; }
+
+/* ── BADGE ── */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-family: var(--mono); font-size: 10px; font-weight: 500; border: 1px solid; }
+.badge-amber { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+.badge-green { background: rgba(34,197,94,0.1); color: var(--green); border-color: rgba(34,197,94,0.25); }
+.badge-red { background: rgba(239,68,68,0.1); color: var(--red); border-color: rgba(239,68,68,0.25); }
+.badge-blue { background: rgba(59,130,246,0.1); color: var(--blue); border-color: rgba(59,130,246,0.25); }
+.badge-violet { background: rgba(139,92,246,0.1); color: var(--violet); border-color: rgba(139,92,246,0.25); }
+.badge-muted { background: rgba(255,255,255,0.05); color: #ffffff; border-color: rgba(255,255,255,0.15); }
+.live-badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 20px; background: rgba(255,255,255,0.07); color: #ffffff; border: 1px solid rgba(255,255,255,0.15); font-family: var(--mono); font-size: 10px; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
+
+/* ── PROGRESS BAR ── */
+.prog-row { margin-bottom: 13px; }
+.prog-row:last-child { margin-bottom: 0; }
+.prog-meta { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.prog-label { color: var(--muted); }
+.prog-track { height: 4px; background: var(--bdr); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 2px; }
+
+/* ── TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 0; border-bottom: 1px solid var(--bdr); font-weight: 400; }
+.tbl td { padding: 12px 0; border-bottom: 1px solid var(--bdr2); font-size: 12px; color: var(--muted); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl td:first-child { color: var(--text); font-weight: 500; font-size: 13px; }
+.tbl td.mono { font-family: var(--mono); font-size: 11px; }
+
+/* ── LIST ROWS ── */
+.list-row { display: grid; align-items: start; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--bdr2); }
+.list-row:last-child { border-bottom: none; }
+.list-row-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.list-row-meta { font-size: 11px; color: var(--muted); }
+.list-idx { font-family: var(--mono); font-size: 10px; color: var(--muted); padding-top: 2px; }
+
+/* ── RADAR ── */
+.radar-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+
+/* ── DONUT LEGEND ── */
+.donut-layout { display: flex; align-items: center; gap: 20px; }
+.donut-legend { flex: 1; }
+.legend-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.legend-label { font-size: 12px; color: var(--muted); }
+.legend-val { font-family: var(--mono); font-size: 12px; font-weight: 500; }
+
+/* ── COLOR SWATCHES ── */
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch { width: 38px; height: 38px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: transform 0.12s, box-shadow 0.12s; flex-shrink: 0; }
+.swatch:hover { transform: scale(1.15); box-shadow: 0 0 0 2px rgba(245,158,11,0.4); }
+
+/* ── TOKEN SCALE ── */
+.token-scale { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--bdr); display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.token-scale-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.token-scale-val { font-family: var(--mono); font-size: 11px; color: #ffffff; }
+
+/* ── CHANGELOG ROW ── */
+.cl-row { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: start; padding: 16px 0; border-bottom: 1px solid var(--bdr2); }
+.cl-row:last-child { border-bottom: none; }
+.cl-v { font-family: var(--mono); font-size: 13px; font-weight: 500; color: #ffffff; padding-top: 2px; }
+.cl-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.cl-sub { font-size: 11px; color: var(--muted); }
+
+/* ── AUDIT TABS ── */
+.audit-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--bdr);
+  padding: 0 36px;
+}
+.audit-tab {
+  font-size: 13px; font-weight: 400; color: var(--muted);
+  padding: 12px 0; margin-right: 28px;
+  cursor: pointer; border-bottom: 1px solid transparent;
+  margin-bottom: -1px; transition: color 0.12s ease;
+  user-select: none;
+}
+.audit-tab:hover { color: var(--text); }
+.audit-tab.active { color: var(--text); border-bottom-color: #ffffff; }
+
+.audit-tab-panel { display: none; }
+.audit-tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+/* ── MATURITY AUDIT ── */
+.maturity-screen {}
+.maturity-start-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 8px;
+  background: #ffffff; color: #000000;
+  border: none; cursor: pointer;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  transition: opacity 0.12s ease;
+}
+.maturity-start-btn:hover { opacity: 0.85; }
+.maturity-outline-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 8px;
+  background: transparent; color: var(--text);
+  border: 1px solid var(--bdr); cursor: pointer;
+  font-family: var(--font); font-size: 13px; font-weight: 400;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.maturity-outline-btn:hover { background: var(--surface2); border-color: #444; }
+
+.maturity-cat-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-bottom: 8px;
+}
+.maturity-cat-card {
+  background: var(--surface); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 16px;
+  transition: border-color 0.12s ease;
+}
+.maturity-cat-card:hover { border-color: #444; }
+.maturity-cat-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.maturity-cat-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+.quiz-option {
+  padding: 14px 18px; border-radius: 10px;
+  border: 1px solid var(--bdr); background: var(--surface);
+  cursor: pointer; font-size: 13px; color: var(--muted);
+  transition: all 0.12s ease; text-align: left;
+  font-family: var(--font);
+}
+.quiz-option:hover { border-color: #555; color: var(--text); background: var(--surface2); }
+.quiz-option.selected { border-color: #ffffff; color: #ffffff; background: rgba(255,255,255,0.06); }
+
+.result-bar-row { margin-bottom: 12px; }
+.result-bar-row:last-child { margin-bottom: 0; }
+.result-bar-meta { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.result-bar-label { color: var(--muted); }
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="logo-wrap">
+    <div class="logo">FGPX <span class="logo-dot"></span></div>
+    <div class="logo-sub">Web Design System</div>
+  </div>
+  <nav>
+    <div class="nav-group-label">Main</div>
+    <div class="nav-item active" data-page="overview">Overview</div>
+    <div class="nav-item" data-page="audit">Audit<span class="nav-badge">12</span></div>
+    <div class="nav-item" data-page="roadmap">Roadmap</div>
+    <div class="nav-item" data-page="health">Health</div>
+    <div class="nav-group-label">System</div>
+    <div class="nav-item" data-page="components">Components</div>
+    <div class="nav-item" data-page="tokens">Tokens</div>
+    <div class="nav-item" data-page="changelog">Changelog</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="status-dot-wrap"><span class="status-dot"></span>v3.4.1 · All systems go</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div id="page-overview" class="page active">
+    <div class="hero">
+      <div class="hero-title">The system that<br><span class="accent">ships faster.</span></div>
+      <div class="hero-desc">FGPX Web Design System powers 14 products across 3 platforms. 83% component adoption. Q1 velocity up 34% from last quarter.</div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-n">83%</div><div class="hero-stat-l">Adoption Rate</div></div>
+        <div class="hero-stat"><div class="hero-stat-n">247</div><div class="hero-stat-l">Components</div></div>
+        <div class="hero-stat"><div class="hero-stat-n">14</div><div class="hero-stat-l">Products</div></div>
+        <div class="hero-stat"><div class="hero-stat-n">4.8</div><div class="hero-stat-l">NPS Score</div></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="grid-3">
+        <div class="card"><div class="card-accent-bar" style="background:var(--green)"></div><div class="stat-label">System Health</div><div class="stat-value">Good</div><div class="stat-delta delta-up">↑ Improved this sprint</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Open Issues</div><div class="stat-value">12</div><div class="stat-delta delta-down">↑ 3 new this week</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--bdr)"></div><div class="stat-label">Next Release</div><div class="stat-value" style="font-size:28px">Mar 21</div><div class="stat-delta">— v3.5 · 8 components</div></div>
+      </div>
+
+      <div class="section-label">Contribution velocity — last 12 weeks</div>
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">PRs merged &amp; reviews</div><div class="card-sub">Rolling 12-week window</div></div>
+          <span class="badge badge-muted">+34% QoQ</span>
+        </div>
+        <div class="chart-wrap" style="height:200px"><canvas id="c-velocity"></canvas></div>
+      </div>
+
+      <div class="section-label">Trends</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Adoption over time</div>
+          <div class="card-sub">Sep 2025 → Mar 2026</div>
+          <div class="chart-wrap" style="height:180px"><canvas id="c-adoption"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Component status</div>
+          <div class="card-sub">247 total components</div>
+          <div class="donut-layout">
+            <div class="chart-wrap" style="width:150px;height:150px;flex-shrink:0"><canvas id="c-donut"></canvas></div>
+            <div class="donut-legend">
+              <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--green)"></div><span class="legend-label">Stable</span></div><span class="legend-val">198</span></div>
+              <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--amber)"></div><span class="legend-label">Beta</span></div><span class="legend-val">34</span></div>
+              <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-label">Deprecated</span></div><span class="legend-val">12</span></div>
+              <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--blue)"></div><span class="legend-label">In Design</span></div><span class="legend-val">8</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">System health radar — 6 dimensions</div>
+      <div class="card">
+        <div class="card-title">Overall system score</div>
+        <div class="card-sub">Accessibility · Coverage · Adoption · Performance · Docs · Tests</div>
+        <div class="radar-layout">
+          <div class="chart-wrap" style="height:260px"><canvas id="c-radar"></canvas></div>
+          <div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Accessibility</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">76%</span></div><div class="prog-track"><div class="prog-fill" style="width:76%;background:var(--amber)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Coverage</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">94%</span></div><div class="prog-track"><div class="prog-fill" style="width:94%;background:var(--green)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Adoption</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">83%</span></div><div class="prog-track"><div class="prog-fill" style="width:83%;background:var(--amber)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Performance</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">89%</span></div><div class="prog-track"><div class="prog-fill" style="width:89%;background:var(--green)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Docs</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">71%</span></div><div class="prog-track"><div class="prog-fill" style="width:71%;background:var(--red)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Tests</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">91%</span></div><div class="prog-track"><div class="prog-fill" style="width:91%;background:var(--green)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ AUDIT ══ -->
+  <div id="page-audit" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Audit</div><div class="page-desc">Component coverage, consistency gaps &amp; design debt</div></div>
+      <div class="page-header-right">Last run: Mar 7, 2026<br>Next: Mar 14, 2026</div>
+    </div>
+
+    <!-- ── AUDIT TABS ── -->
+    <div class="audit-tabs">
+      <div class="audit-tab active" data-tab="audit-overview">Overview</div>
+      <div class="audit-tab" data-tab="audit-maturity">Maturity Audit</div>
+    </div>
+
+    <!-- ── TAB: OVERVIEW ── -->
+    <div id="audit-overview" class="audit-tab-panel active">
+      <div class="content">
+        <div class="grid-4">
+          <div class="card"><div class="card-accent-bar" style="background:var(--red)"></div><div class="stat-label">Critical Issues</div><div class="stat-value">3</div><div class="stat-delta delta-down">Needs immediate action</div></div>
+          <div class="card"><div class="card-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Warnings</div><div class="stat-value">9</div><div class="stat-delta">Same as last audit</div></div>
+          <div class="card"><div class="card-accent-bar" style="background:var(--green)"></div><div class="stat-label">Passing</div><div class="stat-value">231</div><div class="stat-delta delta-up">↑ 14 new passes</div></div>
+          <div class="card"><div class="card-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Coverage</div><div class="stat-value">94%</div><div class="stat-delta delta-up">↑ 2% this sprint</div></div>
+        </div>
+
+        <div class="section-label">Issues by component category</div>
+        <div class="card">
+          <div class="card-title">Audit breakdown</div>
+          <div class="card-sub">Critical · Warnings · Passing per category</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="c-audit-bar"></canvas></div>
+        </div>
+
+        <div class="section-label">Trends &amp; accessibility</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Design debt trend</div>
+            <div class="card-sub">Open issues per sprint — steadily decreasing</div>
+            <div class="chart-wrap" style="height:180px"><canvas id="c-debt"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Accessibility scores</div>
+            <div class="card-sub">Three key WCAG dimensions</div>
+            <div class="chart-wrap" style="height:180px"><canvas id="c-a11y"></canvas></div>
+          </div>
+        </div>
+
+        <div class="section-label">Open issues</div>
+        <div class="card" style="padding:0">
+          <table class="tbl" style="padding:0">
+            <thead style="padding:0 20px"><tr style="padding:0 20px">
+              <th style="padding:12px 20px">Component</th>
+              <th style="padding:12px 20px">Issue</th>
+              <th style="padding:12px 20px">Severity</th>
+              <th style="padding:12px 20px">Team</th>
+              <th style="padding:12px 20px">Age</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:12px 20px">Button</td><td style="padding:12px 20px;color:var(--muted)">Focus ring fails WCAG AA in dark mode</td><td style="padding:12px 20px"><span class="badge badge-red">Critical</span></td><td style="padding:12px 20px;color:var(--muted)">Core</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">12d</td></tr>
+              <tr><td style="padding:12px 20px">Modal</td><td style="padding:12px 20px;color:var(--muted)">Backdrop z-index conflict with Tooltip</td><td style="padding:12px 20px"><span class="badge badge-red">Critical</span></td><td style="padding:12px 20px;color:var(--muted)">Core</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">7d</td></tr>
+              <tr><td style="padding:12px 20px">Select</td><td style="padding:12px 20px;color:var(--muted)">Missing keyboard navigation spec</td><td style="padding:12px 20px"><span class="badge badge-red">Critical</span></td><td style="padding:12px 20px;color:var(--muted)">Patterns</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">3d</td></tr>
+              <tr><td style="padding:12px 20px">Card</td><td style="padding:12px 20px;color:var(--muted)">Inconsistent shadow tokens across themes</td><td style="padding:12px 20px"><span class="badge badge-amber">Warning</span></td><td style="padding:12px 20px;color:var(--muted)">Tokens</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">21d</td></tr>
+              <tr><td style="padding:12px 20px">Input</td><td style="padding:12px 20px;color:var(--muted)">Placeholder text contrast 3.2:1 (min 4.5)</td><td style="padding:12px 20px"><span class="badge badge-amber">Warning</span></td><td style="padding:12px 20px;color:var(--muted)">Core</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">18d</td></tr>
+              <tr><td style="padding:12px 20px">Tabs</td><td style="padding:12px 20px;color:var(--muted)">Mobile variant not documented in Figma</td><td style="padding:12px 20px"><span class="badge badge-amber">Warning</span></td><td style="padding:12px 20px;color:var(--muted)">Mobile</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">5d</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-label">Token consistency</div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 40px">
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Color tokens</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">97%</span></div><div class="prog-track"><div class="prog-fill" style="width:97%;background:var(--green)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Spacing tokens</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">91%</span></div><div class="prog-track"><div class="prog-fill" style="width:91%;background:var(--green)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Typography tokens</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">84%</span></div><div class="prog-track"><div class="prog-fill" style="width:84%;background:var(--amber)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Shadow tokens</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">72%</span></div><div class="prog-track"><div class="prog-fill" style="width:72%;background:var(--amber)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Motion tokens</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">58%</span></div><div class="prog-track"><div class="prog-fill" style="width:58%;background:var(--red)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Radius tokens</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">95%</span></div><div class="prog-track"><div class="prog-fill" style="width:95%;background:var(--green)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: MATURITY AUDIT ── -->
+    <div id="audit-maturity" class="audit-tab-panel">
+      <iframe
+        src="https://ds-audit-a.lovable.app"
+        style="width:100%; height:calc(100vh - 130px); border:none; display:block;"
+        allow="fullscreen"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- ══ ROADMAP ══ -->
+  <div id="page-roadmap" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Roadmap</div><div class="page-desc">Planned work, current sprint &amp; future themes</div></div>
+      <div class="page-header-right">Q1 2026<br>Mar → Jun</div>
+    </div>
+    <div class="content">
+      <div class="grid-3">
+        <div class="card"><div class="card-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Shipping Mar 21</div><div class="stat-value" style="font-size:28px">v3.5</div><div class="stat-delta">8 components · 3 tokens</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--bdr)"></div><div class="stat-label">In Progress</div><div class="stat-value">6</div><div class="stat-delta">Items this sprint</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--bdr)"></div><div class="stat-label">Backlog Items</div><div class="stat-value">34</div><div class="stat-delta delta-up">↑ 5 added from audit</div></div>
+      </div>
+
+      <div class="section-label">Quarterly delivery — shipped vs planned</div>
+      <div class="card">
+        <div class="card-title">Components shipped per quarter</div>
+        <div class="card-sub">Q1 2025 → Q1 2026 (in progress)</div>
+        <div class="chart-wrap" style="height:200px"><canvas id="c-quarterly"></canvas></div>
+      </div>
+
+      <div class="section-label">Sprint 12 — item progress</div>
+      <div class="card">
+        <div id="sprint-items"></div>
+      </div>
+
+      <div class="section-label">Next quarter — Q2/Q3 2026 themes</div>
+      <div class="card" style="padding:0">
+        <div class="list-row" style="grid-template-columns:24px 1fr auto;padding:16px 20px">
+          <div class="list-idx">05</div><div><div class="list-row-title">Data visualization system</div><div class="list-row-meta">Charts, graphs, dashboards · 12 new components planned</div></div><span class="badge badge-muted">Q2</span>
+        </div>
+        <div class="list-row" style="grid-template-columns:24px 1fr auto;padding:16px 20px">
+          <div class="list-idx">06</div><div><div class="list-row-title">Mobile design tokens</div><div class="list-row-meta">Extend token architecture for iOS &amp; Android parity</div></div><span class="badge badge-muted">Q2</span>
+        </div>
+        <div class="list-row" style="grid-template-columns:24px 1fr auto;padding:16px 20px">
+          <div class="list-idx">07</div><div><div class="list-row-title">Full WCAG AA compliance</div><div class="list-row-meta">Systematic accessibility pass across all 247 components</div></div><span class="badge badge-muted">Q2</span>
+        </div>
+        <div class="list-row" style="grid-template-columns:24px 1fr auto;padding:16px 20px;border-bottom:none">
+          <div class="list-idx">08</div><div><div class="list-row-title">Contributor onboarding revamp</div><div class="list-row-meta">Reduce time-to-first-PR from 3 weeks to 3 days</div></div><span class="badge badge-muted">Q3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HEALTH ══ -->
+  <div id="page-health" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Health</div><div class="page-desc">System metrics, performance &amp; adoption signals</div></div>
+      <span class="live-badge"><span class="live-dot"></span>All systems nominal</span>
+    </div>
+    <div class="content">
+      <div class="grid-4">
+        <div class="card"><div class="card-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Health Score</div><div class="stat-value">83</div><div class="stat-delta delta-up">↑ 4 pts this quarter</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--green)"></div><div class="stat-label">Bundle Size</div><div class="stat-value">48kb</div><div class="stat-delta delta-up">↓ 3kb from last release</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--green)"></div><div class="stat-label">Avg Load Time</div><div class="stat-value">1.2s</div><div class="stat-delta delta-up">↓ 0.3s improvement</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--bdr)"></div><div class="stat-label">Test Coverage</div><div class="stat-value">91%</div><div class="stat-delta delta-up">↑ 4% this quarter</div></div>
+      </div>
+
+      <div class="section-label">Core web vitals over time</div>
+      <div class="card">
+        <div class="card-title">Performance trends</div>
+        <div class="card-sub">LCP · FID · CLS — Feb → Mar 2026</div>
+        <div class="chart-wrap" style="height:200px"><canvas id="c-vitals"></canvas></div>
+      </div>
+
+      <div class="section-label">Adoption &amp; key metrics</div>
+      <div class="grid-32">
+        <div class="card">
+          <div class="card-title">Adoption by product</div>
+          <div class="card-sub">% of FGPX components used per product</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="c-product"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Key metrics</div>
+          <div class="card-sub">Four core health dimensions</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="c-health-doughnut"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section-label">Bundle size per release</div>
+      <div class="card">
+        <div class="card-title">Compressed bundle size</div>
+        <div class="card-sub">v3.0 → v3.4 · Target: &lt;45kb</div>
+        <div class="chart-wrap" style="height:160px"><canvas id="c-bundle"></canvas></div>
+      </div>
+
+      <div class="section-label">Detailed metrics</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">Performance</div>
+          <table class="tbl">
+            <tbody>
+              <tr><td>Largest Contentful Paint</td><td class="mono" style="text-align:right">1.2s ✓</td></tr>
+              <tr><td>Cumulative Layout Shift</td><td class="mono" style="text-align:right">0.04 ✓</td></tr>
+              <tr><td>First Input Delay</td><td class="mono" style="text-align:right">18ms ✓</td></tr>
+              <tr><td>Time to Interactive</td><td class="mono" style="text-align:right;color:#888">2.8s ⚠</td></tr>
+              <tr><td>First Contentful Paint</td><td class="mono" style="text-align:right">0.8s ✓</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">Repository</div>
+          <table class="tbl">
+            <tbody>
+              <tr><td>Open PRs</td><td class="mono" style="text-align:right">7</td></tr>
+              <tr><td>Failing CI checks</td><td class="mono" style="text-align:right;color:#888">2</td></tr>
+              <tr><td>Stale branches</td><td class="mono" style="text-align:right;color:#888">14</td></tr>
+              <tr><td>Avg PR review time</td><td class="mono" style="text-align:right">1.4d</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:16px">
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">CI pass rate</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">94%</span></div><div class="prog-track"><div class="prog-fill" style="width:94%;background:var(--green)"></div></div></div>
+            <div class="prog-row"><div class="prog-meta"><span class="prog-label">Deploy success rate</span><span style="color:#ffffff;font-family:var(--mono);font-size:11px">98%</span></div><div class="prog-track"><div class="prog-fill" style="width:98%;background:var(--green)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COMPONENTS ══ -->
+  <div id="page-components" class="page">
+    <div class="page-header"><div><div class="page-title">Components</div><div class="page-desc">247 components across 14 categories</div></div></div>
+    <div class="content">
+      <div class="grid-4">
+        <div class="card"><div class="card-accent-bar" style="background:var(--green)"></div><div class="stat-label">Stable</div><div class="stat-value">198</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Beta</div><div class="stat-value">34</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--red)"></div><div class="stat-label">Deprecated</div><div class="stat-value">12</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--blue)"></div><div class="stat-label">In Design</div><div class="stat-value">8</div></div>
+      </div>
+      <div class="section-label">Status distribution</div>
+      <div class="card">
+        <div class="card-title">Components by status</div>
+        <div class="card-sub">247 total</div>
+        <div class="donut-layout" style="justify-content:center;gap:40px">
+          <div class="chart-wrap" style="width:200px;height:200px;flex-shrink:0"><canvas id="c-comp-donut"></canvas></div>
+          <div class="donut-legend" style="max-width:200px">
+            <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--green)"></div><span class="legend-label">Stable</span></div><span class="legend-val">198</span></div>
+            <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--amber)"></div><span class="legend-label">Beta</span></div><span class="legend-val">34</span></div>
+            <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-label">Deprecated</span></div><span class="legend-val">12</span></div>
+            <div class="legend-row"><div style="display:flex;align-items:center;gap:8px"><div class="legend-dot" style="background:var(--blue)"></div><span class="legend-label">In Design</span></div><span class="legend-val">8</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">By category</div>
+      <div class="card" style="padding:0">
+        <table class="tbl">
+          <thead><tr><th style="padding:12px 20px">Category</th><th style="padding:12px 20px">Count</th><th style="padding:12px 20px">Status</th></tr></thead>
+          <tbody>
+            <tr><td style="padding:12px 20px">Forms &amp; Inputs</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">42</td><td style="padding:12px 20px"><span class="badge badge-green">All stable</span></td></tr>
+            <tr><td style="padding:12px 20px">Navigation</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">28</td><td style="padding:12px 20px"><span class="badge badge-green">All stable</span></td></tr>
+            <tr><td style="padding:12px 20px">Overlays &amp; Feedback</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">31</td><td style="padding:12px 20px"><span class="badge badge-amber">2 in beta</span></td></tr>
+            <tr><td style="padding:12px 20px">Data Display</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">38</td><td style="padding:12px 20px"><span class="badge badge-amber">5 in beta</span></td></tr>
+            <tr><td style="padding:12px 20px">Layout</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">22</td><td style="padding:12px 20px"><span class="badge badge-green">All stable</span></td></tr>
+            <tr><td style="padding:12px 20px">Typography</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">18</td><td style="padding:12px 20px"><span class="badge badge-green">All stable</span></td></tr>
+            <tr><td style="padding:12px 20px">Iconography</td><td style="padding:12px 20px;font-family:var(--mono);color:var(--muted)">28</td><td style="padding:12px 20px"><span class="badge badge-blue">In progress</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TOKENS ══ -->
+  <div id="page-tokens" class="page">
+    <div class="page-header"><div><div class="page-title">Tokens</div><div class="page-desc">292 design tokens — color, spacing, typography, shadow &amp; motion</div></div></div>
+    <div class="content">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+        <div class="card"><div class="card-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Color</div><div class="stat-value" style="font-size:32px">184</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--green)"></div><div class="stat-label">Spacing</div><div class="stat-value" style="font-size:32px">32</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--blue)"></div><div class="stat-label">Typography</div><div class="stat-value" style="font-size:32px">48</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--violet)"></div><div class="stat-label">Shadow</div><div class="stat-value" style="font-size:32px">16</div></div>
+        <div class="card"><div class="card-accent-bar" style="background:var(--cyan)"></div><div class="stat-label">Motion</div><div class="stat-value" style="font-size:32px">12</div></div>
+      </div>
+      <div class="section-label">Token distribution</div>
+      <div class="card">
+        <div class="card-title">Tokens by category</div>
+        <div class="card-sub">292 total</div>
+        <div style="display:flex;justify-content:center">
+          <div class="chart-wrap" style="height:260px;width:100%;max-width:500px"><canvas id="c-tokens-pie"></canvas></div>
+        </div>
+      </div>
+      <div class="section-label">Color palette</div>
+      <div class="card">
+        <div class="swatches" id="swatches"></div>
+        <div class="token-scale">
+          <div><div class="token-scale-label">Spacing scale</div><div class="token-scale-val">4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80</div></div>
+          <div><div class="token-scale-label">Type scale</div><div class="token-scale-val">11, 12, 13, 14, 16, 18, 20, 24, 30, 36, 48</div></div>
+          <div><div class="token-scale-label">Border radius</div><div class="token-scale-val">2, 4, 6, 8, 12, 16, 24, ∞</div></div>
+          <div><div class="token-scale-label">Shadow layers</div><div class="token-scale-val">sm, md, lg, xl, 2xl</div></div>
+          <div><div class="token-scale-label">Duration</div><div class="token-scale-val">75, 100, 150, 200, 300, 500, 700</div></div>
+          <div><div class="token-scale-label">Z-index</div><div class="token-scale-val">0, 10, 20, 30, 40, 50, auto</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHANGELOG ══ -->
+  <div id="page-changelog" class="page">
+    <div class="page-header"><div><div class="page-title">Changelog</div><div class="page-desc">Release history and version notes</div></div></div>
+    <div class="content">
+      <div class="section-label">Components shipped per release</div>
+      <div class="card">
+        <div class="card-title">New components vs patches</div>
+        <div class="card-sub">Per minor version</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="c-changelog"></canvas></div>
+      </div>
+      <div class="section-label">Release history</div>
+      <div class="card" style="padding:0">
+        <div style="padding:0 20px">
+          <div class="cl-row"><div class="cl-v">v3.4</div><div><div class="cl-title">Data Table v2 · Toast system · Skeleton loader</div><div class="cl-sub">3 new components, 8 patches · Feb 28, 2026</div></div><span class="badge badge-muted" style="color:#fff;border-color:#444">Latest</span></div>
+          <div class="cl-row"><div class="cl-v" style="color:var(--muted)">v3.3</div><div><div class="cl-title">Combobox (beta) · Icon system overhaul</div><div class="cl-sub">1 new component, 240 new icons · Feb 7, 2026</div></div><span class="badge badge-muted">Stable</span></div>
+          <div class="cl-row"><div class="cl-v" style="color:var(--muted)">v3.2</div><div><div class="cl-title">Dark mode token system · Theme switcher</div><div class="cl-sub">Major token restructure · Jan 17, 2026</div></div><span class="badge badge-muted">Stable</span></div>
+          <div class="cl-row"><div class="cl-v" style="color:var(--muted)">v3.1</div><div><div class="cl-title">Responsive grid system</div><div class="cl-sub">14 component patches · Dec 3, 2025</div></div><span class="badge badge-muted">Stable</span></div>
+          <div class="cl-row" style="border-bottom:none"><div class="cl-v" style="color:var(--muted)">v3.0</div><div><div class="cl-title">Major rewrite — FGPX v3</div><div class="cl-sub">14 new components, full token system · Nov 1, 2025</div></div><span class="badge badge-muted">LTS</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+const navItems = document.querySelectorAll('.nav-item');
+const pages = document.querySelectorAll('.page');
+let currentPage = 'overview';
+const initializedCharts = new Set();
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const page = item.dataset.page;
+    navItems.forEach(n => n.classList.remove('active'));
+    pages.forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('page-' + page).classList.add('active');
+    currentPage = page;
+    if (!initializedCharts.has(page)) {
+      initChartsForPage(page);
+      initializedCharts.add(page);
+    }
+  });
+});
+
+// ── CHART.JS DEFAULTS ─────────────────────────────────────────────────────
+Chart.defaults.color = '#737373';
+Chart.defaults.borderColor = '#262626';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 11;
+
+const COLORS = {
+  amber: '#f59e0b', green: '#22c55e', red: '#ef4444',
+  blue: '#3b82f6', violet: '#8b5cf6', cyan: '#06b6d4',
+  surface: '#0f0f0f', bdr: '#262626',
+};
+
+function gridCfg() {
+  return { color: '#1f1f1f', drawBorder: false };
+}
+function axisCfg() {
+  return { grid: gridCfg(), border: { display: false }, ticks: { color: '#737373' } };
+}
+function tooltipCfg() {
+  return {
+    backgroundColor: '#111', borderColor: '#262626', borderWidth: 1,
+    titleColor: '#737373', bodyColor: '#fafafa',
+    padding: 10, cornerRadius: 8,
+    titleFont: { family: "'Inter', sans-serif", size: 11 },
+    bodyFont: { family: "'Inter', sans-serif", size: 11 },
+  };
+}
+
+function makeGradient(ctx, color, alphaTop = 0.35, alphaBot = 0) {
+  const g = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+  g.addColorStop(0, color + Math.round(alphaTop * 255).toString(16).padStart(2,'0'));
+  g.addColorStop(1, color + Math.round(alphaBot * 255).toString(16).padStart(2,'0'));
+  return g;
+}
+
+// ── CHART INITIALIZERS ────────────────────────────────────────────────────
+
+function initOverviewCharts() {
+  // Velocity area
+  const vCtx = document.getElementById('c-velocity').getContext('2d');
+  new Chart(vCtx, {
+    type: 'line',
+    data: {
+      labels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'],
+      datasets: [
+        { label: 'PRs merged', data: [8,11,9,13,14,10,16,15,18,19,20,23], borderColor: COLORS.amber, backgroundColor: makeGradient(vCtx, '#f59e0b'), fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+        { label: 'Reviews', data: [12,14,10,16,18,13,20,19,22,24,25,28], borderColor: COLORS.green, backgroundColor: makeGradient(vCtx, '#22c55e'), fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipCfg(), legend: { labels: { color: '#737373', boxWidth: 10 } } }, scales: { x: axisCfg(), y: axisCfg() } }
+  });
+
+  // Adoption line
+  const aCtx = document.getElementById('c-adoption').getContext('2d');
+  new Chart(aCtx, {
+    type: 'line',
+    data: {
+      labels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+      datasets: [
+        { label: 'Adoption %', data: [61,65,69,72,76,80,83], borderColor: COLORS.amber, backgroundColor: makeGradient(aCtx, '#f59e0b', 0.2), fill: true, tension: 0.4, pointBackgroundColor: COLORS.amber, pointRadius: 4, borderWidth: 2.5 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: tooltipCfg(), legend: { display: false },
+        annotation: { annotations: { targetLine: { type: 'line', yMin: 80, yMax: 80, borderColor: '#444', borderDash: [4,4], label: { display: true, content: 'Target 80%', color: '#555', font: { size: 10 } } } } }
+      },
+      scales: { x: axisCfg(), y: { ...axisCfg(), min: 55, max: 90, ticks: { color: '#737373', callback: v => v + '%' } } }
+    }
+  });
+
+  // Component status donut
+  const dCtx = document.getElementById('c-donut').getContext('2d');
+  new Chart(dCtx, {
+    type: 'doughnut',
+    data: { labels: ['Stable','Beta','Deprecated','In Design'], datasets: [{ data: [198,34,12,8], backgroundColor: [COLORS.green, COLORS.amber, COLORS.red, COLORS.blue], borderWidth: 0, hoverOffset: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { tooltip: tooltipCfg(), legend: { display: false } } }
+  });
+
+  // Radar
+  const rCtx = document.getElementById('c-radar').getContext('2d');
+  new Chart(rCtx, {
+    type: 'radar',
+    data: {
+      labels: ['Accessibility','Coverage','Adoption','Performance','Docs','Tests'],
+      datasets: [{ label: 'Score', data: [76,94,83,89,71,91], borderColor: COLORS.amber, backgroundColor: COLORS.amber + '28', pointBackgroundColor: COLORS.amber, borderWidth: 2, pointRadius: 3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { grid: { color: '#262626' }, angleLines: { color: '#262626' }, pointLabels: { color: '#737373', font: { size: 11 } }, ticks: { display: false }, min: 0, max: 100 } },
+      plugins: { tooltip: tooltipCfg(), legend: { display: false } }
+    }
+  });
+}
+
+function initAuditCharts() {
+  // Stacked bar
+  const abCtx = document.getElementById('c-audit-bar').getContext('2d');
+  new Chart(abCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Forms','Nav','Overlays','Data','Layout','Type'],
+      datasets: [
+        { label: 'Critical', data: [1,0,2,0,0,0], backgroundColor: COLORS.red, borderRadius: 0 },
+        { label: 'Warnings', data: [2,1,3,2,1,0], backgroundColor: COLORS.amber, borderRadius: 0 },
+        { label: 'Passing', data: [38,27,26,36,21,18], backgroundColor: COLORS.green, borderRadius: { topLeft: 4, topRight: 4 } },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipCfg(), legend: { labels: { color: '#737373', boxWidth: 10 } } }, scales: { x: { ...axisCfg(), stacked: true }, y: { ...axisCfg(), stacked: true } } }
+  });
+
+  // Debt trend
+  const dtCtx = document.getElementById('c-debt').getContext('2d');
+  new Chart(dtCtx, {
+    type: 'line',
+    data: {
+      labels: ['S8','S9','S10','S11','S12'],
+      datasets: [{ label: 'Open issues', data: [28,24,22,19,15], borderColor: COLORS.red, backgroundColor: makeGradient(dtCtx, '#ef4444', 0.25), fill: true, tension: 0.4, pointBackgroundColor: COLORS.red, pointRadius: 4, borderWidth: 2.5 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipCfg(), legend: { display: false } }, scales: { x: axisCfg(), y: axisCfg() } }
+  });
+
+  // A11y polar
+  const a11yCtx = document.getElementById('c-a11y').getContext('2d');
+  new Chart(a11yCtx, {
+    type: 'polarArea',
+    data: { labels: ['Color contrast','Keyboard nav','Screen reader'], datasets: [{ data: [88,76,62], backgroundColor: [COLORS.green+'99', COLORS.amber+'99', COLORS.red+'99'], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: '#1f1f1f' }, ticks: { display: false, backdropColor: 'transparent' }, pointLabels: { display: false }, min: 0 } }, plugins: { tooltip: tooltipCfg(), legend: { labels: { color: '#737373', boxWidth: 10 } } } }
+  });
+}
+
+function initRoadmapCharts() {
+  // Quarterly bar
+  const qCtx = document.getElementById('c-quarterly').getContext('2d');
+  new Chart(qCtx, {
+    type: 'bar',
+    data: {
+      labels: ["Q1 '25","Q2 '25","Q3 '25","Q4 '25","Q1 '26"],
+      datasets: [
+        { label: 'Planned', data: [22,26,24,30,24], backgroundColor: '#262626', borderColor: '#333', borderWidth: 1, borderRadius: 4 },
+        { label: 'Shipped', data: [18,24,21,28,14], backgroundColor: COLORS.amber, borderRadius: 4 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipCfg(), legend: { labels: { color: '#737373', boxWidth: 10 } } }, scales: { x: axisCfg(), y: axisCfg() } }
+  });
+
+  // Sprint progress items
+  const sprintData = [
+    { id:'01', title:'Combobox — stable release', meta:'Promote from beta · resolve keyboard nav', progress: 85, q:'Q1' },
+    { id:'02', title:'Dark mode token audit', meta:'Resolve 4 contrast failures', progress: 70, q:'Q1' },
+    { id:'03', title:'Date picker component', meta:'New component · design complete', progress: 30, q:'Q1' },
+    { id:'04', title:'Figma → code sync tooling', meta:'Automate token exports from Figma Variables', progress: 55, q:'Q1' },
+  ];
+  const container = document.getElementById('sprint-items');
+  sprintData.forEach(item => {
+    const color = item.progress >= 70 ? COLORS.green : item.progress >= 40 ? COLORS.amber : COLORS.blue;
+    const qColor = item.q === 'Q1' ? '#3b82f6' : '#737373';
+    container.innerHTML += `
+      <div style="margin-bottom:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${item.id}</span>
+            <span style="font-size:13px;font-weight:500">${item.title}</span>
+            <span class="badge" style="background:rgba(59,130,246,0.1);color:${qColor};border-color:rgba(59,130,246,0.2)">${item.q}</span>
+          </div>
+          <span style="font-family:var(--mono);font-size:12px;font-weight:500;color:${color}">${item.progress}%</span>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:6px;margin-left:28px">${item.meta}</p>
+        <div style="margin-left:28px;height:5px;background:var(--bdr);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${item.progress}%;background:${color};border-radius:3px"></div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function initHealthCharts() {
+  // Web vitals
+  const vCtx = document.getElementById('c-vitals').getContext('2d');
+  new Chart(vCtx, {
+    type: 'line',
+    data: {
+      labels: ['Feb 1','Feb 8','Feb 15','Feb 22','Mar 1','Mar 7'],
+      datasets: [
+        { label: 'LCP (s)', data: [2.1,1.9,1.8,1.6,1.4,1.2], borderColor: COLORS.amber, tension: 0.4, pointRadius: 3, borderWidth: 2, fill: false },
+        { label: 'FID (ms÷10)', data: [4.5,3.8,3.5,3.0,2.4,1.8], borderColor: COLORS.blue, tension: 0.4, pointRadius: 3, borderWidth: 2, fill: false },
+        { label: 'CLS ×100', data: [12,9,7,6,5,4], borderColor: COLORS.green, tension: 0.4, pointRadius: 3, borderWidth: 2, fill: false },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipCfg(), legend: { labels: { color: '#737373', boxWidth: 10 } } }, scales: { x: axisCfg(), y: axisCfg() } }
+  });
+
+  // Product adoption horizontal bar
+  const pCtx = document.getElementById('c-product').getContext('2d');
+  new Chart(pCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Grow','Dash','Admin','iOS','API','Docs'],
+      datasets: [{ label: 'Adoption %', data: [96,86,80,71,62,36], backgroundColor: [COLORS.green,COLORS.green,COLORS.green,COLORS.amber,COLORS.amber,COLORS.red], borderRadius: { topRight: 4, bottomRight: 4 }, borderSkipped: 'left' }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: tooltipCfg(), legend: { display: false } },
+      scales: { x: { ...axisCfg(), max: 100, ticks: { callback: v => v + '%' } }, y: axisCfg() }
+    }
+  });
+
+  // Health doughnut
+  const hdCtx = document.getElementById('c-health-doughnut').getContext('2d');
+  new Chart(hdCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Test Coverage','Accessibility','Token Consistency','Adoption Rate'],
+      datasets: [{ data: [91,76,94,83], backgroundColor: [COLORS.green, COLORS.amber, COLORS.blue, COLORS.violet], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { tooltip: tooltipCfg(), legend: { position: 'bottom', labels: { color: '#737373', boxWidth: 10, padding: 12 } } } }
+  });
+
+  // Bundle size
+  const bCtx = document.getElementById('c-bundle').getContext('2d');
+  new Chart(bCtx, {
+    type: 'bar',
+    data: {
+      labels: ['v3.0','v3.1','v3.2','v3.3','v3.4'],
+      datasets: [{ label: 'Bundle (kb)', data: [62,58,55,52,48], backgroundColor: [COLORS.blue,COLORS.blue,COLORS.blue,COLORS.blue,COLORS.green], borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: tooltipCfg(), legend: { display: false },
+        annotation: { annotations: { target: { type: 'line', yMin: 45, yMax: 45, borderColor: COLORS.red, borderDash: [4,4] } } }
+      },
+      scales: { x: axisCfg(), y: { ...axisCfg(), ticks: { callback: v => v + 'kb' } } }
+    }
+  });
+}
+
+function initComponentsCharts() {
+  const ctx = document.getElementById('c-comp-donut').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: ['Stable','Beta','Deprecated','In Design'], datasets: [{ data: [198,34,12,8], backgroundColor: [COLORS.green, COLORS.amber, COLORS.red, COLORS.blue], borderWidth: 0, hoverOffset: 8 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { tooltip: tooltipCfg(), legend: { display: false } } }
+  });
+}
+
+function initTokensCharts() {
+  const ctx = document.getElementById('c-tokens-pie').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Color (184)','Spacing (32)','Typography (48)','Shadow (16)','Motion (12)'],
+      datasets: [{ data: [184,32,48,16,12], backgroundColor: [COLORS.amber, COLORS.green, COLORS.blue, COLORS.violet, COLORS.cyan], borderWidth: 0, hoverOffset: 8 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipCfg(), legend: { position: 'right', labels: { color: '#737373', boxWidth: 12, padding: 14 } } } }
+  });
+
+  // Color swatches
+  const colors = ['#0a0a0a','#171717','#262626','#404040','#525252','#f59e0b','#d97706','#92400e','#22c55e','#16a34a','#166534','#3b82f6','#2563eb','#1e40af','#ef4444','#dc2626','#8b5cf6','#7c3aed','#06b6d4','#f5f5f5','#a3a3a3'];
+  const sw = document.getElementById('swatches');
+  colors.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'swatch';
+    d.style.background = c;
+    d.title = c;
+    sw.appendChild(d);
+  });
+}
+
+function initChangelogCharts() {
+  const ctx = document.getElementById('c-changelog').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['v3.0','v3.1','v3.2','v3.3','v3.4'],
+      datasets: [
+        { label: 'New components', data: [14,0,4,1,3], backgroundColor: COLORS.amber, borderRadius: 4 },
+        { label: 'Patches', data: [0,14,8,12,8], backgroundColor: COLORS.blue, borderRadius: 4 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipCfg(), legend: { labels: { color: '#737373', boxWidth: 10 } } }, scales: { x: axisCfg(), y: axisCfg() } }
+  });
+}
+
+function initChartsForPage(page) {
+  const map = {
+    overview: initOverviewCharts,
+    audit: initAuditCharts,
+    roadmap: initRoadmapCharts,
+    health: initHealthCharts,
+    components: initComponentsCharts,
+    tokens: initTokensCharts,
+    changelog: initChangelogCharts,
+  };
+  if (map[page]) map[page]();
+}
+
+
+// ── AUDIT TABS ────────────────────────────────────────────────────────────
+document.querySelectorAll('.audit-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.audit-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.audit-tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── MATURITY AUDIT QUIZ ───────────────────────────────────────────────────
+const maturityQuestions = [
+  // Foundation — Design Tokens
+  { category: 'Design Tokens', q: 'How well are your design tokens (colors, spacing, typography) defined and documented?', options: ['No tokens defined', 'Basic tokens exist but inconsistent', 'Tokens defined, partially adopted', 'Tokens well-defined and mostly adopted', 'Full token system, widely adopted across all products'] },
+  // Foundation — Component Library
+  { category: 'Component Library', q: 'How mature is your shared component library?', options: ['No shared library', 'A few components exist, no governance', 'Growing library, used by some teams', 'Comprehensive library with versioning', 'Complete, versioned library adopted across all products'] },
+  // Foundation — Documentation
+  { category: 'Documentation', q: 'How thorough is your design system documentation?', options: ['No documentation', 'Minimal notes exist', 'Core components documented', 'Most components documented with examples', 'Full documentation: usage, a11y, examples, do/don\'ts'] },
+  // Growth — Interoperability
+  { category: 'Interoperability', q: 'How well does your design system integrate with other tools and systems?', options: ['No integration', 'Manual handoff only', 'Figma + code linked for some components', 'Tokens synced between Figma and code', 'Full automation: tokens, components, and versioning synced'] },
+  // Growth — Quality Assurance
+  { category: 'Quality Assurance', q: 'What level of quality assurance does your design system have?', options: ['No QA process', 'Ad hoc reviews only', 'Basic accessibility checks', 'Automated a11y + visual regression tests', 'Comprehensive QA: a11y, performance, visual, cross-platform'] },
+  // Growth — Innovation
+  { category: 'Innovation', q: 'How well does your design system support new patterns and innovation?', options: ['Blocks innovation', 'Rarely accommodates new patterns', 'Some flexibility for new patterns', 'Design system evolves with product needs', 'Proactively enables and documents new patterns'] },
+  // ROI — Governance
+  { category: 'Governance & Contribution', q: 'How structured is your contribution and governance model?', options: ['No process exists', 'Informal contributions only', 'Basic contribution guidelines exist', 'Clear process with reviews and owners', 'RFC process, SLAs, defined roles, active working group'] },
+  // ROI — Adoption
+  { category: 'Adoption', q: 'How widely is your design system adopted across product teams?', options: ['Not adopted', 'Used by 1–2 teams', 'Used by some teams (25–50%)', 'Used by most teams (50–80%)', 'Used by all teams with high compliance (80%+)'] },
+  // ROI — Culture
+  { category: 'Culture', q: 'How embedded is the design system in your organisation\'s culture and planning?', options: ['Not on anyone\'s radar', 'Known but not prioritised', 'Supported by design, less by engineering', 'Cross-functional buy-in and budget allocated', 'Executive support, KPIs tracked, dedicated team'] },
+];
+
+const categoryColors = ['#f59e0b','#22c55e','#3b82f6','#8b5cf6','#ef4444','#06b6d4','#f97316','#ec4899','#84cc16'];
+let currentQuestion = 0;
+let answers = [];
+
+function showMaturityIntro() {
+  document.getElementById('maturity-intro').style.display = 'block';
+  document.getElementById('maturity-quiz').style.display = 'none';
+  document.getElementById('maturity-results').style.display = 'none';
+}
+
+function startMaturityAudit() {
+  currentQuestion = 0;
+  answers = [];
+  document.getElementById('maturity-intro').style.display = 'none';
+  document.getElementById('maturity-results').style.display = 'none';
+  document.getElementById('maturity-quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = maturityQuestions[currentQuestion];
+  const total = maturityQuestions.length;
+
+  document.getElementById('quiz-category-label').textContent = q.category;
+  document.getElementById('quiz-step-label').textContent = `${currentQuestion + 1} / ${total}`;
+  document.getElementById('quiz-progress-bar').style.width = `${((currentQuestion) / total) * 100}%`;
+  document.getElementById('quiz-question').textContent = q.q;
+
+  const optWrap = document.getElementById('quiz-options');
+  optWrap.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = `<span style="font-family:var(--mono);font-size:10px;color:#555;margin-right:10px">${i + 1}</span>${opt}`;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      answers[currentQuestion] = i + 1; // score 1–5
+      setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion < total) {
+          renderQuestion();
+        } else {
+          showResults();
+        }
+      }, 280);
+    });
+    optWrap.appendChild(btn);
+  });
+}
+
+function showResults() {
+  document.getElementById('maturity-quiz').style.display = 'none';
+  document.getElementById('maturity-results').style.display = 'block';
+
+  const total = answers.reduce((a, b) => a + b, 0);
+  const max = maturityQuestions.length * 5;
+  const pct = Math.round((total / max) * 100);
+
+  document.getElementById('results-total').textContent = total;
+
+  let level, levelColor;
+  if (pct < 30) { level = 'Nascent'; levelColor = '#ef4444'; }
+  else if (pct < 50) { level = 'Emerging'; levelColor = '#f59e0b'; }
+  else if (pct < 70) { level = 'Defined'; levelColor = '#3b82f6'; }
+  else if (pct < 85) { level = 'Managed'; levelColor = '#22c55e'; }
+  else { level = 'Optimised'; levelColor = '#22c55e'; }
+
+  document.getElementById('results-level').innerHTML = `<span class="badge" style="background:${levelColor}22;color:${levelColor};border-color:${levelColor}44;font-size:11px">${level}</span>`;
+
+  const summaries = {
+    'Nascent': 'Your design system is in its early stages. Focus on establishing foundational tokens and a core component library.',
+    'Emerging': 'Good start — foundational pieces exist. Prioritise documentation and cross-team adoption.',
+    'Defined': 'A solid system is in place. Invest in governance, automation, and broader adoption.',
+    'Managed': 'Your design system is well-run. Focus on optimising contribution workflows and measuring impact.',
+    'Optimised': 'Excellent! Your design system is a strategic asset. Keep iterating and sharing learnings.',
+  };
+  document.getElementById('results-summary').textContent = summaries[level];
+
+  const barsEl = document.getElementById('results-bars');
+  barsEl.innerHTML = '';
+  maturityQuestions.forEach((q, i) => {
+    const score = answers[i] || 0;
+    const pctBar = (score / 5) * 100;
+    barsEl.innerHTML += `
+      <div class="result-bar-row">
+        <div class="result-bar-meta">
+          <span class="result-bar-label">${q.category}</span>
+          <span style="font-family:var(--mono);font-size:11px;color:#fff">${score}/5</span>
+        </div>
+        <div style="height:4px;background:var(--bdr);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${pctBar}%;background:${categoryColors[i]};border-radius:2px;transition:width 0.6s ease"></div>
+        </div>
+      </div>`;
+  });
+}
+
+// Init overview on load
+initChartsForPage('overview');
+initializedCharts.add('overview');
+
+</script>
+</body>
+</html>
